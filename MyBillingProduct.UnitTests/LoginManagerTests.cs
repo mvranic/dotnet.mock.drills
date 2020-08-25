@@ -31,19 +31,23 @@ namespace MyBillingProduct.UnitTests {
             var stubLogger = new FakeLogger();
             var mockWebservice = new FakeWebService();
             stubLogger.WillWriteFail = true;
-            LoginManager1 lm = new LoginManager1(stubLogger, mockWebservice);
+            var loggingManager = CreateLoggingManager(stubLogger, mockWebservice);
 
-            lm.IsLoginOK("a", "pass");
+            loggingManager.IsLoginOK("a", "pass");
 
             StringAssert.Contains("got exception - Write faild", mockWebservice.GetLastPostMessage());
+        }
+
+        private static LoginManager1 CreateLoggingManager(FakeLogger stubLogger, FakeWebService mockWebservice) {
+            return new LoginManager1(stubLogger, mockWebservice);
         }
 
         [Test]
         public void AddUser_WithLog_LogUserAndPassword() {
             var mockLogger = new FakeLogger();
-            LoginManager1 lm = new LoginManager1(mockLogger, new FakeWebService());
-           
-            lm.AddUser("a", "pass");
+            var loggingManager = CreateLoggingManager(mockLogger, new FakeWebService());
+
+            loggingManager.AddUser("a", "pass");
 
             StringAssert.Contains("user added: a,pass", mockLogger.GetLastWrite());
         }
@@ -51,9 +55,9 @@ namespace MyBillingProduct.UnitTests {
         [Test]
         public void ChangePass_WithLog_LogUserAndNewAndOldPasswords() {
             var mockLogger = new FakeLogger();
-            LoginManager1 lm = new LoginManager1(mockLogger, new FakeWebService());
+            var loggingManager = CreateLoggingManager(mockLogger, new FakeWebService());
 
-            lm.ChangePass("a", "oldpass", "newpass");
+            loggingManager.ChangePass("a", "oldpass", "newpass");
 
             StringAssert.Contains("pass changed: a, oldpass, newpass", mockLogger.GetLastWrite());
         }
