@@ -1,31 +1,50 @@
 using System;
 using System.Collections;
+using System.Runtime.Remoting.Messaging;
 
 namespace MyBillingProduct
 {
 	public class LoginManager1
 	{
-	    private Hashtable m_users = new Hashtable();
+	    private Hashtable Users = new Hashtable();
+        private ILogger Logger;
+		private IWebService WebService;
 
-        
-	    public bool IsLoginOK(string user, string password)
+
+		public LoginManager1(ILogger logger, IWebService webservice) {
+            Logger = logger;
+			WebService = webservice;
+		}
+
+        public bool IsLoginOK(string user, string password)
 	    {
-            if (m_users[user] != null &&
-	            (string) m_users[user] == password)
-	        {
-	            return true;
-	        }
-	        return false;
+				if (Users[user] != null &&
+					(string)Users[user] == password) {
+					WriteToLog($"login ok: user: {user}");
+					return true;
+				}
+				WriteToLog($"bad login: {user},{password}");
+				return false;
 	    }
 
-	    public void AddUser(string user, string password)
+        private void WriteToLog(string message) {
+			try {
+				Logger.Write(message);
+			} catch(Exception e) {
+				WebService.Write($"got exception - {e.Message}");
+			}
+        }
+
+        public void AddUser(string user, string password)
 	    {
-	        m_users[user] = password;
-	    }
+	        Users[user] = password;
+			Logger.Write($"user added: {user},{password}");
+		}
 
 	    public void ChangePass(string user, string oldPass, string newPassword)
 		{
-			m_users[user]= newPassword;
+			Users[user]= newPassword;
+			Logger.Write($"pass changed: {user}, {oldPass}, {newPassword}");
 		}
 	}
 }
